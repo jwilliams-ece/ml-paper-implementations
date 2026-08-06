@@ -5,7 +5,7 @@ import torchvision
 
 from .data import get_dataloader
 
-trainset, trainloader, validationset, validationloader, _, _ = get_dataloader(batch_size=1, num_workers=6, shuffle=True)
+trainset, trainloader, validationset, validationloader, _, _ = get_dataloader(batch_size=4, num_workers=6, shuffle=True)
 
 classes = trainset.classes
 
