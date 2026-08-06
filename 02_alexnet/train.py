@@ -36,7 +36,7 @@ def main():
 
     _, trainloader, _, validationloader, _, _ = get_dataloader(batch_size=128,num_workers=6,shuffle=True)
 
-    epochs = 90
+    epochs = 1
     
     def train():
         print("Training started")
@@ -70,12 +70,16 @@ def main():
 
                 loop.set_postfix(stats)
 
+        save_path = "model_weights.pth"
+        torch.save(model.state_dict(), save_path)
+        print(f"Model weights saved to {save_path}")
 
 
 
+
+    train()
     print('Finished training')
 
-    # train()
 
 
         

@@ -28,7 +28,7 @@ class AlexNet(nn.Module):
 
     def initialize_weights(self):
         for m in self.modules():
-            if isinstance(m, (nn.Conv2d(),nn.Linear())):
+            if isinstance(m, (nn.Conv2d,nn.Linear)):
                 nn.init.normal_(m.weight, mean=0.0, std=0.01)
 
         # Initialize neuron biases to 1: Conv2, Conv4, Conv5, all fc layers
