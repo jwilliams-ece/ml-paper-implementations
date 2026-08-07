@@ -41,7 +41,7 @@ class AlexNet(nn.Module):
 
         nn.init.constant_(self.fc6.bias, 1)
         nn.init.constant_(self.fc7.bias, 1)
-        nn.init.constant_(self.fc8.bias, 0)
+        nn.init.constant_(self.fc8.bias, 1)
 
     
     def forward(self, input):
