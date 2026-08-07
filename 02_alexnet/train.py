@@ -39,7 +39,7 @@ def main():
     epochs = 1
     
     def train():
-        print("Training started")
+        print("Starting Training")
 
         for epoch in range(epochs):
             running_loss = 0.0
