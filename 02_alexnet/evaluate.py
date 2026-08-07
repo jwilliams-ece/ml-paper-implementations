@@ -25,7 +25,7 @@ def validate():
 
     running_val_loss = 0.0
 
-    _, _, _, validationloader, _, _ = get_dataloader(batch_size=128, num_workers=6,shuffle=True)
+    _, _, _, validationloader, _, _ = get_dataloader(batch_size=128, num_workers=6,shuffle=False)
     criterion = nn.CrossEntropyLoss()
 
     with torch.no_grad():
@@ -39,7 +39,11 @@ def validate():
             running_val_loss += loss.item()
 
         total_validation_loss = running_val_loss / len(validationloader)
-        print(f"Validation Loss: {total_validation_loss:.4f}")         
+        print(f"Validation Loss: {total_validation_loss:.4f}")     
+
+
+def test():
+    pass    
         
 if __name__ == "__main__":
     validate()
