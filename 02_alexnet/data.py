@@ -5,7 +5,7 @@ from torchvision.transforms import v2
 
 # ImageNet 100 channel statistics
 mean = [0.4595, 0.4559, 0.3857]
-Std = [0.2517, 0.2373, 0.2526]
+std = [0.2517, 0.2373, 0.2526]
 
 def get_dataloader(
         batch_size: int,
@@ -32,6 +32,7 @@ def get_dataloader(
             (1.0,1.0,1.0),
         )
     ])
+
     transform_val_test = transforms.Compose([
         v2.ToImage(),
         v2.Resize(256),
@@ -43,9 +44,8 @@ def get_dataloader(
             (1.0,1.0,1.0),
         )
     ])
-    print("Dataloader started")
 
-
+    print("Starting DataLoader")
 
     trainset = datasets.ImageFolder(root=r'C:\Users\marve\Desktop\papers\02_alexnet\data\imagenet_100\train',
                                         transform=transform)
@@ -55,15 +55,15 @@ def get_dataloader(
     validationset = datasets.ImageFolder(root=r'C:\Users\marve\Desktop\papers\02_alexnet\data\imagenet_100\val',
                                             transform=transform_val_test)
     validationloader = DataLoader(dataset=validationset, batch_size=batch_size,shuffle=shuffle, num_workers=num_workers)
-    print("Validation Loaded")
+    print("Validationset Loaded")
 
 
     testset = datasets.ImageFolder(root=r'C:\Users\marve\Desktop\papers\02_alexnet\data\imagenet_100\test',
                                         transform=transform_val_test)
     testloader = DataLoader(dataset=testset, batch_size=batch_size,shuffle=shuffle, num_workers=num_workers)
-    print("test data loaded")
+    print("Testset Loaded")
 
-    print("Data loading complete")
+    print("Successfully completed DataLoader!")
 
 
 
