@@ -28,6 +28,9 @@ def validate():
     _, _, _, validationloader, _, _ = get_dataloader(batch_size=128, num_workers=6,shuffle=False) # Keep False
     criterion = nn.CrossEntropyLoss()
 
+    correct = 0.0
+    total = 0.0
+
     with torch.no_grad():
         loop = tqdm(validationloader)
         for images, labels in loop:
@@ -36,10 +39,21 @@ def validate():
             predictions = model(images)
             loss = criterion(predictions, labels)
 
+
+            # Accuracy tracking
+            for prediction, label in zip(predictions,labels):
+                predicted_class = torch.argmax(prediction)
+                total += 1
+                if predicted_class == label:
+                    correct += 1
+
             running_val_loss += loss.item()
 
+        accuracy = correct / total * 100
         total_validation_loss = running_val_loss / len(validationloader)
-        print(f"Validation Loss: {total_validation_loss:.4f}")     
+        
+        print(f"Validation Loss: {total_validation_loss:.4f}")   
+        print(f"Accuracy: {accuracy:.2f}%")   
 
 
 def test():
