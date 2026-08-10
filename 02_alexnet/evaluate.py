@@ -12,6 +12,7 @@ import torch.nn as nn
 from torch import optim
 from tqdm import tqdm
 from torchmetrics.classification import MulticlassF1Score
+from torchmetrics.classification import MulticlassConfusionMatrix
 
 from .implementation import AlexNet
 from .data import get_dataloader
@@ -35,6 +36,9 @@ def validate(model: nn.Module, device: str, path: str, batch_size: int, num_work
     f1_metrics = MulticlassF1Score(
         num_classes=num_classes,
         average=None,
+    ).to(device)
+    confusion_matrix = MulticlassConfusionMatrix(
+        num_classes=num_classes,
     ).to(device)
 
     with torch.no_grad():
@@ -76,16 +80,22 @@ def validate(model: nn.Module, device: str, path: str, batch_size: int, num_work
 
             # F1 Score tracking
             f1_metrics.update(avg_logits, labels)
+
+            # confusion matrix calculation
+            confusion_matrix.update(avg_logits, labels)
             
 
     accuracy = correct / total * 100
     total_validation_loss = running_val_loss / total
     scores = f1_metrics.compute()
+    conf_matrix = confusion_matrix.compute()
 
     print(f"Validation Loss: {total_validation_loss:.4f}")   
     print(f"Accuracy: {accuracy:.2f}%")   
     for class_idx, score in enumerate(scores):
         print(f"Class {class_idx}: F1 = {score:.4f}")
+
+    
 
 
 def test(model: nn.Module, device: str, path: str, batch_size: int, num_workers: int):
