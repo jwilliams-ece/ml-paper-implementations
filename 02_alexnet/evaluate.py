@@ -9,10 +9,15 @@ import time
 
 import torch
 import torch.nn as nn
+import pandas as pd
 from torch import optim
 from tqdm import tqdm
-from torchmetrics.classification import MulticlassF1Score
-from torchmetrics.classification import MulticlassConfusionMatrix
+
+from torchmetrics.classification import (
+    MulticlassF1Score,
+    MulticlassConfusionMatrix
+)
+
 
 from .implementation import AlexNet
 from .data import get_dataloader
@@ -95,7 +100,35 @@ def validate(model: nn.Module, device: str, path: str, batch_size: int, num_work
     for class_idx, score in enumerate(scores):
         print(f"Class {class_idx}: F1 = {score:.4f}")
 
-    
+    conf_matrix = confusion_matrix.compute().cpu().numpy()
+
+    rows = []
+
+    for actual_class in range(num_classes):
+
+        row = conf_matrix[actual_class].copy()
+
+        correct = row[actual_class]
+        total = row.sum()
+
+        row[actual_class] = 0
+        top_confused = row.argsort()[-3:][::-1]
+
+        rows.append({
+            "class": actual_class,
+            "total": total,
+            "correct": correct,
+            "accuracy": correct / total if total > 0 else 0,
+            "most_confused_with": top_confused[0],
+            "mistakes_to_top_class": row[top_confused[0]],
+            "second_confused_with": top_confused[1],
+            "third_confused_with": top_confused[2],
+        })
+
+    summary = pd.DataFrame(rows)
+
+    # print(summary.to_string(index=False))
+
 
 
 def test(model: nn.Module, device: str, path: str, batch_size: int, num_workers: int):
