@@ -36,7 +36,7 @@ def get_dataloader(
     transform_val_test = transforms.Compose([
         v2.ToImage(),
         v2.Resize(256),
-        v2.CenterCrop(224),                            # v2.TenCrop(size=(224,224), vertical_flip=False),
+        v2.TenCrop(size=(224,224), vertical_flip=False), # v2.CenterCrop(224)   
         v2.ToDtype(torch.float32, scale=True),
 
         v2.Normalize(

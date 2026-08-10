@@ -32,7 +32,6 @@ class AlexNet(nn.Module):
                 nn.init.normal_(m.weight, mean=0.0, std=0.01)
 
         # Initialize neuron biases to 1: Conv2, Conv4, Conv5, all fc layers
-        
         nn.init.constant_(self.conv1.bias, 0)
         nn.init.constant_(self.conv2.bias, 1)
         nn.init.constant_(self.conv3.bias, 0)

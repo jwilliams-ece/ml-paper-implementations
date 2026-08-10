@@ -8,11 +8,16 @@ from .data import get_dataloader
 trainset, trainloader, validationset, validationloader, _, _ = get_dataloader(batch_size=4, num_workers=6, shuffle=True)
 
 classes = trainset.classes
+mean_224 = (0.4595, 0.4559, 0.3857)
+std_224 = (1.0,1.0,1.0)
 
 def main():
 
     def imshow(img):
         # Function does not currently contain unnormalization
+        mean = torch.tensor(mean_224).view(3, 1, 1)
+        std = torch.tensor(std_224).view(3, 1, 1)
+        img = img.cpu() * std + mean
 
         # Move img to cpu and clamp vals 0-1
         img = img.cpu()

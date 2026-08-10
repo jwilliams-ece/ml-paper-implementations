@@ -15,32 +15,38 @@ from tqdm import tqdm
 
 from .implementation import AlexNet
 from .data import get_dataloader
+from .evaluate import validate
 
 device = torch.device(torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else 'cpu')
 
 
 def main():
+    # Model save path
+    save_path = "model_weights.pth"
 
-    # Init the model and the optimizer outside the training loop
-
-    learning_rate = 1e-5
-    weight_decay = 5e-4
+    learning_rate = 1e-4
+    weight_decay = 1e-4
     momentum = 0.9 
+
+    batch_size = 128
+    num_workers = 6
 
     model = AlexNet().to(device)
     criterion = nn.CrossEntropyLoss()
+
     # optimizer = optim.SGD(model.parameters(),
     #                       lr=learning_rate,
     #                       momentum=momentum,
-    #                     #   weight_decay=weight_decay
+    #                       weight_decay=weight_decay
     #                     )
-    optimizer = optim.Adam(model.parameters(),lr=1e-4,weight_decay=1e-4)
+    optimizer = optim.Adam(model.parameters(),lr=learning_rate,weight_decay=weight_decay)
 
-    _, trainloader, _, validationloader, _, _ = get_dataloader(batch_size=128,num_workers=6,shuffle=True)
+    _, trainloader, _, validationloader, _, _ = get_dataloader(batch_size=batch_size,num_workers=num_workers,shuffle=True)
 
-    epochs = 10
+    epochs = 90
     
     def train():
+        
         print("Starting Training")
 
         for epoch in range(epochs):
@@ -83,12 +89,15 @@ def main():
 
                 loop.set_postfix(stats)
 
-        save_path = "model_weights.pth"
+        
         torch.save(model.state_dict(), save_path)
         print(f"Model weights saved to {save_path}")
 
-    train()
-    print('Finished training')
+    # train()
+    # print('Finished Training')
+
+    validate(model=model,device=device, path=save_path,batch_size=batch_size,num_workers=num_workers)  
+    print("Finished Validating")
 
 
   
