@@ -126,8 +126,8 @@ def validate(model: nn.Module, device: str, path: str, batch_size: int, num_work
         })
 
     summary = pd.DataFrame(rows)
-
-    # print(summary.to_string(index=False))
+    summary.to_csv(path="confusion_matrix.csv")
+    print(summary.to_string(index=False))
 
 
 

@@ -9,6 +9,10 @@ from pathlib import Path
 import random
 import shutil
 
+
+    # for index, synset in enumerate(trainset.classes):
+    #     print(f"{index} -> {synset}")
+
 # Change this to the location of your imagenet_100 folder.
 DATASET_DIR = Path(r"C:\Users\marve\Desktop\papers\02_alexnet\data\imagenet_100")
 
