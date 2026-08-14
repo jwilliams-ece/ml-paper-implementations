@@ -82,12 +82,12 @@ def main():
 
             update_parameters(learning_rate=lr,context=context,embedding_gradient=dE,output_weights_gradient=dW)
 
-        if epoch % 1500 == 0:
+        if epoch % 500 == 0:
             print(f"Epoch: {epoch:<15} Loss: {loss}")
 
 
 
-    epochs = 100_000
+    epochs = 10_000
     for epoch in range(epochs):
         train(epoch)
     print("done")
