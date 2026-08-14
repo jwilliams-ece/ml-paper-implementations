@@ -14,51 +14,75 @@ data_pairs, _ , _ = get_data()
 def softmax(logits):
     shifted_logits = logits - np.max(logits)
 
-    exp_values = np.exp(shifted_logits)
-    denominator = exp_values.sum()
+    exp_logits = np.exp(shifted_logits)
+    normalization = exp_logits.sum()
 
-    probabilities = exp_values / denominator
+    probabilities = exp_logits / normalization
 
     return probabilities
 
-def negative_log_loss(probabilites, target):
-    loss = - (np.log(probabilites[target] + 1e-10))
+
+def negative_log_loss(probabilities, target_index):
+    target_probability = probabilities[target_index]
+    loss = -np.log(target_probability + 1e-10)
+
     return loss
 
-def do_gradient(predictions, target):
-    arr = predictions.copy()
-    arr[target] -= 1
-    do = arr
 
-    return do
+def compute_output_gradient(probabilities, target_index):
+    output_gradient = probabilities.copy()
+    output_gradient[target_index] -= 1
 
-def embeddings_gradient(h, output_grad):
-    dW = np.outer(np.transpose(h), output_grad)
-
-    return dW
-
-def dh_gradient(output_grad):
-    dh = output_grad @ np.transpose(model.output_matrix)
-
-    return dh
-
-def dE_gradient(context,dh):
-    c = len(context)
-    dE_context = dh/c
-
-    return dE_context
-
-def update_weights(lr, context, dE_context):
-    for vector in context:
-        model.embbeddings_matrix[vector] = (model.embbeddings_matrix[vector]) -  (lr * dE_context)
+    return output_gradient
 
 
+def compute_output_weights_gradient(hidden, output_gradient):
+    weights_gradient = np.outer(np.transpose(hidden), output_gradient)
 
+    return weights_gradient
+
+
+def compute_hidden_gradient(output_gradient):
+    hidden_gradient = output_gradient @ np.transpose(model.output_matrix)
+
+    return hidden_gradient
+
+
+def compute_embedding_gradient(context, hidden_gradient):
+    context_size = len(context)
+    embedding_gradient = hidden_gradient / context_size
+
+    return embedding_gradient
+
+
+def update_embeddings(learning_rate, context, embedding_gradient,output_weights_gradient):
+    model.output_matrix -= learning_rate * output_weights_gradient
+    for token_index in context:
+        model.embeddings_matrix[token_index] -= (
+            learning_rate * embedding_gradient
+        )
 
 def train():
+    lr = 1e-4
 
     for context, target in data_pairs:
-        logits = model(context)
+        logits, hidden = model(context)
+
+        # compute softmax and loss
+        sfmax_probs = softmax(logits)
+        loss = negative_log_loss(sfmax_probs, target)
+
+        do = compute_output_gradient(sfmax_probs,target)
+
+        dW = compute_output_weights_gradient(hidden, do)
+
+        dh = compute_hidden_gradient(do)
+
+        dE = compute_embedding_gradient(context,dh)
+
+        update_embeddings(learning_rate=lr,context=context,embedding_gradient=dE,output_weights_gradient=dW)
+
+
 
 
 

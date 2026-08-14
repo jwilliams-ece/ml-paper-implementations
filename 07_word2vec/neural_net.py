@@ -29,4 +29,4 @@ class CBOW(Module):
         h = self.aggregate(input=input)
         out = h @ self.output_matrix
 
-        return out
+        return out, h
