@@ -17,11 +17,11 @@ class Module:
 
 class CBOW(Module):
     def __init__(self, vocab_size, dimension_size):
-        self.embbeddings_matrix = np.random.uniform(-1,1,(vocab_size,dimension_size))
+        self.embeddings_matrix = np.random.uniform(-1,1,(vocab_size,dimension_size))
         self.output_matrix = np.random.uniform(-1,1,(dimension_size,vocab_size))
 
     def aggregate(self,input):
-        mean = np.mean(self.embbeddings_matrix[input], axis=0)
+        mean = np.mean(self.embeddings_matrix[input], axis=0)
 
         return mean
 
