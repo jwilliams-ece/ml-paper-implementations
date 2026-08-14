@@ -1,51 +1,131 @@
-import numpy as np
+import torch
+from torch.utils.data import Dataset, DataLoader
 
-# Available data
-tokens = [
-    "the", "quick", "brown", "fox",
-    "jumps", "over", "the", "lazy", "dog"
+from collections import Counter
+
+
+# -----------------------------
+# Load and preprocess text8
+# -----------------------------
+
+with open(
+    r"C:\Users\marve\Desktop\papers\07_word2vec\data\text8\text8",
+    "r",
+    encoding="utf-8",
+) as f:
+    text = f.read()
+
+tokens = text.split()
+
+word_counts = Counter(tokens)
+
+min_count = 5
+
+# Keep words that appear often enough
+vocab_words = [
+    word
+    for word, count in word_counts.items()
+    if count >= min_count
 ]
 
-# sort data and store into dict of numerical keys/values
-vocab = sorted(set(tokens))
-vocab_size = len(vocab)
-EMBEDDING_DIM = 4 # size of each vector
+vocab_size = len(vocab_words)
 
-def get_data():
-    word_to_idx = {word: i for i, word in enumerate(vocab)}
-    idx_to_word = {i: word for i, word in enumerate(vocab)}
+word_to_idx = {
+    word: i
+    for i, word in enumerate(vocab_words)
+}
 
-    encoded = [word_to_idx[word] for word in tokens]
-
-    window = 2
-    pairs = []
+idx_to_word = {
+    i: word
+    for word, i in word_to_idx.items()
+}
 
 
-    for center_idx in range(len(encoded)):
+# -----------------------------
+# Encode the actual corpus
+# -----------------------------
+
+encoded = [
+    word_to_idx[word]
+    for word in tokens
+    if word in word_to_idx
+]
+
+
+# -----------------------------
+# CBOW Dataset
+# -----------------------------
+
+class CBOWDataset(Dataset):
+    def __init__(self, encoded_corpus, window_size):
+        self.encoded_corpus = encoded_corpus
+        self.window_size = window_size
+
+    def __len__(self):
+        return len(self.encoded_corpus)
+
+    def __getitem__(self, center_idx):
         context = []
-        for offset in range(-window, window + 1):
 
+        for offset in range(
+            -self.window_size,
+            self.window_size + 1
+        ):
             if offset == 0:
                 continue
 
             context_idx = center_idx + offset
 
-            if 0 <= context_idx < len(encoded):  
+            if 0 <= context_idx < len(self.encoded_corpus):
                 context.append(
-                    encoded[context_idx]
+                    self.encoded_corpus[context_idx]
                 )
 
-        pairs.append((
+        target = self.encoded_corpus[center_idx]
+
+        context = torch.tensor(
             context,
-            encoded[center_idx]
-        ))
+            dtype=torch.long
+        )
 
-    
-    X_train = []
-    y_train = []
+        target = torch.tensor(
+            target,
+            dtype=torch.long
+        )
 
-    for context, target in pairs:
-        X_train.append(context)
-        y_train.append(target)
+        return context, target
 
-    return pairs, X_train, y_train
+
+# -----------------------------
+# Build dataset
+# -----------------------------
+
+window_size = 5
+
+dataset = CBOWDataset(
+    encoded_corpus=encoded,
+    window_size=window_size,
+)
+
+print("Vocabulary size:", vocab_size)
+print("Encoded corpus size:", len(encoded))
+print("Number of training examples:", len(dataset))
+
+
+# Inspect one example
+context, target = dataset[0]
+
+print("\nContext IDs:")
+print(context)
+
+print("\nTarget ID:")
+print(target)
+
+print("\nContext words:")
+print([
+    idx_to_word[token.item()]
+    for token in context
+])
+
+print("\nTarget word:")
+print(idx_to_word[target.item()])

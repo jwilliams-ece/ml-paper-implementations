@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import numpy as np
-from numpy.typing import NDArray
 
 
 
@@ -10,23 +9,20 @@ This is the architecture for CBOW
 
 """
 
-class Module:
-    def __call__(self, *args, **kwargs):
-        return self.forward(*args, **kwargs)
-
-
-class CBOW(Module):
+class CBOW(nn.Module):
     def __init__(self, vocab_size, dimension_size):
-        self.embeddings_matrix = np.random.uniform(-1,1,(vocab_size,dimension_size))
-        self.output_matrix = np.random.uniform(-1,1,(dimension_size,vocab_size))
+        super().__init__()
+        self.embeddings_matrix = nn.Embedding(vocab_size,dimension_size)
+        self.output_matrix = nn.Linear(dimension_size,vocab_size)
 
     def aggregate(self,input):
-        mean = np.mean(self.embeddings_matrix[input], axis=0)
+        embeddings = self.embeddings_matrix(input)
+        context_vector = embeddings.mean(dim=1)
 
-        return mean
+        return context_vector
 
-    def forward(self, input: NDArray):
+    def forward(self, input):
         h = self.aggregate(input=input)
-        out = h @ self.output_matrix
+        out = self.output_matrix(h)
 
         return out, h
