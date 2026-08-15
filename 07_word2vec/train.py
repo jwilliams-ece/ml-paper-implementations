@@ -23,7 +23,7 @@ EMBEDDING_DIM = 25
 
 def main():
 
-    epochs = 10
+    epochs = 1
     window_size = 5
     batch_size = 256
 
@@ -63,6 +63,11 @@ def main():
 
             if epoch % 2 == 0:
                 print(f"Epoch: {epoch:<15} Loss: {average_loss}")
+
+        torch.save(
+            model.state_dict(),
+            "cbow_weights.pth"
+        )
 
 
     train(epochs=epochs)

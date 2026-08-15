@@ -19,7 +19,7 @@ tokens = text.split()
 
 word_counts = Counter(tokens)
 
-min_count = 30
+min_count = 5
 
 # Keep words that appear often enough
 vocab_words = [
