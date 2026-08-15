@@ -19,7 +19,7 @@ tokens = text.split()
 
 word_counts = Counter(tokens)
 
-min_count = 5
+min_count = 30
 
 # Keep words that appear often enough
 vocab_words = [
@@ -101,16 +101,20 @@ class CBOWDataset(Dataset):
 # -----------------------------
 
 def get_data_loader(window_size, batch_size):
+    print("Starting DataLoader")
     dataset = CBOWDataset(
         encoded_corpus=encoded,
         window_size=window_size,
     )
+    print("Dataset done")
 
     dataloader = DataLoader(
         dataset=dataset,
         batch_size=batch_size,
-        shuffle=True
+        shuffle=True,
+        num_workers=6
     )
+    print("DataLoader Done")
 
     return dataset, dataloader
 
