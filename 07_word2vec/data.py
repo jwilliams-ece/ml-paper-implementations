@@ -100,32 +100,49 @@ class CBOWDataset(Dataset):
 # Build dataset
 # -----------------------------
 
-window_size = 5
+def get_data_loader(window_size, batch_size):
+    dataset = CBOWDataset(
+        encoded_corpus=encoded,
+        window_size=window_size,
+    )
 
-dataset = CBOWDataset(
+    dataloader = DataLoader(
+        dataset=dataset,
+        batch_size=batch_size,
+        shuffle=True
+    )
+
+    return dataset, dataloader
+
+
+def test():
+    window_size = 5
+
+    dataset = CBOWDataset(
     encoded_corpus=encoded,
     window_size=window_size,
-)
-
-print("Vocabulary size:", vocab_size)
-print("Encoded corpus size:", len(encoded))
-print("Number of training examples:", len(dataset))
+    )
 
 
-# Inspect one example
-context, target = dataset[0]
+    print("Vocabulary size:", vocab_size)
+    print("Encoded corpus size:", len(encoded))
+    print("Number of training examples:", len(dataset))
 
-print("\nContext IDs:")
-print(context)
 
-print("\nTarget ID:")
-print(target)
+    # Inspect one example
+    context, target = dataset[0]
 
-print("\nContext words:")
-print([
+    print("\nContext IDs:")
+    print(context)
+
+    print("\nTarget ID:")
+    print(target)
+
+    print("\nContext words:")
+    print([
     idx_to_word[token.item()]
     for token in context
-])
+    ])
 
-print("\nTarget word:")
-print(idx_to_word[target.item()])
+    print("\nTarget word:")
+    print(idx_to_word[target.item()])

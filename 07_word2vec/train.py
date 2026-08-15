@@ -7,6 +7,8 @@ from data import(
     get_data,
 )
 
+
+
 def main():
     model = CBOW(vocab_size=vocab_size, dimension_size=EMBEDDING_DIM)
     data_pairs, _ , _ = get_data()
