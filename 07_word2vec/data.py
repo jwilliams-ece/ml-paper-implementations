@@ -2,17 +2,15 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 
 from collections import Counter
-
+from pathlib import Path
 
 # -----------------------------
 # Load and preprocess text8
 # -----------------------------
 
-with open(
-    r"C:\Users\marve\Desktop\papers\07_word2vec\data\text8\text8",
-    "r",
-    encoding="utf-8",
-) as f:
+TEXT_FILE = Path(__file__).resolve().parent / "data" / "text8" / "text8"
+
+with open(TEXT_FILE, "r", encoding="utf-8") as f:
     text = f.read()
 
 tokens = text.split()

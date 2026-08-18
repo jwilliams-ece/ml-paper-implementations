@@ -2,6 +2,7 @@ import torch
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from torchvision.transforms import v2
+from pathlib import Path
 
 # ImageNet 100 channel statistics
 mean = [0.4595, 0.4559, 0.3857]
@@ -47,23 +48,51 @@ def get_dataloader(
 
     print("Starting DataLoader")
 
-    trainset = datasets.ImageFolder(root=r'C:\Users\marve\Desktop\papers\02_alexnet\data\imagenet_100\train',
-                                        transform=transform)
-    trainloader = DataLoader(dataset=trainset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+    DATA_DIR = Path(__file__).resolve().parent / "data" / "imagenet_100"
+
+    trainset = datasets.ImageFolder(
+        root=DATA_DIR / "train",
+        transform=transform
+    )
+
+    trainloader = DataLoader(
+        dataset=trainset,
+        batch_size=batch_size,
+        shuffle=shuffle,
+        num_workers=num_workers
+    )
+
     print("Trainset Loaded")
 
-    validationset = datasets.ImageFolder(root=r'C:\Users\marve\Desktop\papers\02_alexnet\data\imagenet_100\val',
-                                            transform=transform_val_test)
-    validationloader = DataLoader(dataset=validationset, batch_size=batch_size,shuffle=shuffle, num_workers=num_workers)
+
+    validationset = datasets.ImageFolder(
+        root=DATA_DIR / "val",
+        transform=transform_val_test
+    )
+
+    validationloader = DataLoader(
+        dataset=validationset,
+        batch_size=batch_size,
+        shuffle=shuffle,
+        num_workers=num_workers
+    )
+
     print("Validationset Loaded")
 
 
-    testset = datasets.ImageFolder(root=r'C:\Users\marve\Desktop\papers\02_alexnet\data\imagenet_100\test',
-                                        transform=transform_val_test)
-    testloader = DataLoader(dataset=testset, batch_size=batch_size,shuffle=shuffle, num_workers=num_workers)
-    print("Testset Loaded")
+    testset = datasets.ImageFolder(
+        root=DATA_DIR / "test",
+        transform=transform_val_test
+    )
 
-    print("Successfully completed DataLoader!")
+    testloader = DataLoader(
+        dataset=testset,
+        batch_size=batch_size,
+        shuffle=shuffle,
+        num_workers=num_workers
+    )
+
+    print("Testset Loaded")
 
 
 
