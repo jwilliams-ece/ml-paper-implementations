@@ -31,29 +31,51 @@ input_tensor_2 = torch.tensor([1,2,3])
 # Repeated for each word
 # Vector of sinusoids gets added to indexed embeddings
 
-def positional_encoding(input_pos, embed_dim, embedded_vector = None):
-    # e.g. embedded vector = [ [.231, .56116,.005], [.098,.0068,.0098], [.231, .56116, .005] ] 
-    # input_pos = 3, embed_dim = 3
-    # input_pos corresponds to the idx of each input token
-    # Creating a matrix of values of the same dimension of the embedded_vector to add to it
-    positional_matrix = torch.empty(0,embed_dim)
-    for pos_idx in range(1, input_pos + 1):
-            positional_vector = torch.tensor([])
-            for dim_idx in range(1, embed_dim + 1):
-                if dim_idx % 2 == 0:
-                    wav = np.sin(pos_idx / (10_000**(2 * dim_idx / embed_dim)))
-                else:
-                    wav = np.cos(pos_idx / (10_000**(2 * dim_idx / embed_dim)))
+def positional_encoding(input_pos, embed_dim, embedded_vector=None):
+    """Generate sinusoidal positional encodings and add them to embeddings.
 
-                positional_vector = torch.cat((positional_vector,torch.tensor(wav).unsqueeze(0)))
-            positional_matrix = torch.cat((positional_matrix, positional_vector.unsqueeze(0)), dim=0)
-                
-    return positional_matrix + embedded_vecotor    
+    Args:
+        input_pos: Number of token positions in the input sequence.
+        embed_dim: Number of dimensions in each token embedding.
+        embedded_vector: Matrix of token embeddings with one row per position.
+
+    Returns:
+        The token embeddings with positional encodings added.
+
+    Notes:
+        This implementation assumes that embed_dim is even so that each
+        sine value has a corresponding cosine value.
+    """
+    positional_matrix = torch.empty(0, embed_dim)
+
+    for pos_idx in range(input_pos):
+        positional_vector = torch.tensor([])
+
+        # Each i represents one sine/cosine pair of embedding dimensions.
+        for i in range(embed_dim // 2):
+            denominator = 10_000 ** (2 * i / embed_dim)
+
+            sine = np.sin(pos_idx / denominator)
+            cosine = np.cos(pos_idx / denominator)
+
+            positional_vector = torch.cat(
+                (positional_vector, torch.tensor(sine).unsqueeze(0))
+            )
+            positional_vector = torch.cat(
+                (positional_vector, torch.tensor(cosine).unsqueeze(0))
+            )
+
+        positional_matrix = torch.cat(
+            (positional_matrix, positional_vector.unsqueeze(0)),
+            dim=0,
+        )
+
+    return positional_matrix + embedded_vector   
 
 
-embedded_vecotor = embeddings(input_tensor_2)    
+embedded_vector = embeddings(input_tensor_2)    
 
-matrix = positional_encoding(3,4, embedded_vector=embedded_vecotor)
+matrix = positional_encoding(3,4, embedded_vector=embedded_vector)
 print(matrix)
 
 
