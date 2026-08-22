@@ -76,7 +76,11 @@ def positional_encoding(input_pos, embed_dim, embedded_vector=None):
 embedded_vector = embeddings(input_tensor_2)    
 
 matrix = positional_encoding(3,4, embedded_vector=embedded_vector)
-print(matrix)
+
+
+a = b = 2 
+print(a)
+print(b)
 
 
 
