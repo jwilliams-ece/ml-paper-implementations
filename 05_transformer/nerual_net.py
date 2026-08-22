@@ -8,7 +8,7 @@ import torch.nn.functional as F
 
 class Transformer(nn.Module):
     # Input: Tokenized sequence
-    def __init__(self, vocab_size, d_model, heads):
+    def __init__(self, vocab_size, d_model, heads, text_len):
         super().__init__()
 
         # Convert input sequence into emmbedded sequence 
@@ -22,21 +22,29 @@ class Transformer(nn.Module):
         self.K_layer = nn.Linear(in_features=d_model, out_features=d_k, dtype=torch.float64) 
         self.V_layer = nn.Linear(in_features=d_model, out_features=d_v, dtype=torch.float64)
 
+        # Normalization for encoder sublayers
+        self.layer_norm_1 = nn.LayerNorm( d_k, dtype=torch.float64)
+        self.layer_norm_2 = nn.LayerNorm( d_k, dtype=torch.float64)
+
+        # Position-wise FFN for encoder
+        self.encoder_ffn_w1 = nn.Linear(in_features=d_k, out_features=2048, dtype=torch.float64)
+        self.encoder_ffn_w2 = nn.Linear(in_features=2048, out_features=d_k, dtype=torch.float64)
+
     class Encoder():
         # Recieves the values from the positional encoder
         # Needs Query(Q), Key(K), and Value(V) maticies to do scaled dot product attention
         # use nn.Linear to compute Q
         # Perform MatMul on Q @ K 
-        def __init__(self, Q, K, V, dim):
+        def __init__(self, Q, K, V, d_k):
 
             self.Q_matrix = Q
             self.K_matrix = K
             self.V_matrix = V
-            self.dim = dim
+            self.d_k = d_k
 
         def self_attention(self):
             QT_mul = self.Q_matrix @ torch.transpose(self.K_matrix, dim0=0, dim1=1)
-            sqrt_dk = torch.sqrt(torch.tensor(self.dim))
+            sqrt_dk = torch.sqrt(torch.tensor(self.d_k))
             sft_max = F.softmax((QT_mul / sqrt_dk), dim=1)
             attention = sft_max @ self.V_matrix
 
@@ -102,16 +110,25 @@ class Transformer(nn.Module):
         K_layer = self.K_layer(positional_matrix)
         V_layer = self.V_layer(positional_matrix)
 
-        attention = self.Encoder(Q=Q_layer, K=K_layer, V=V_layer, dim=1).self_attention()
+        #TODO d_k needs to be modular not hard coded
+        attention = self.Encoder(Q=Q_layer, K=K_layer, V=V_layer, d_k=20).self_attention()
+        layer_norm_1 = self.layer_norm_1((attention + positional_matrix))
+        encoder_ffn_w1 = self.encoder_ffn_w1(layer_norm_1)
+        r1 = F.relu(encoder_ffn_w1)
+        encoder_ffn_w2 = self.encoder_ffn_w2(r1)
+        layer_norm_2 = self.layer_norm_2(encoder_ffn_w2)
 
-        return attention
+        return layer_norm_2
         
 
+
+# Test data
 test_tokens = torch.tensor([0,1,2])
+text_len = len(test_tokens)
 
-model = Transformer(vocab_size=200,d_model=20,heads=1)
-attention = model(test_tokens)
+model = Transformer(vocab_size=200,d_model=20,heads=1,text_len=text_len)
+encoder_output = model(test_tokens)
 
-print(attention)
+print(encoder_output)
 
     
