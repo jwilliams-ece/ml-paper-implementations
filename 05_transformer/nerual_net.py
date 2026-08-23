@@ -116,7 +116,7 @@ class Transformer(nn.Module):
         encoder_ffn_w1 = self.encoder_ffn_w1(layer_norm_1)
         r1 = F.relu(encoder_ffn_w1)
         encoder_ffn_w2 = self.encoder_ffn_w2(r1)
-        layer_norm_2 = self.layer_norm_2(encoder_ffn_w2)
+        layer_norm_2 = self.layer_norm_2(encoder_ffn_w2 + layer_norm_1)
 
         return layer_norm_2
         
