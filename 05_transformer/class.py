@@ -77,10 +77,16 @@ embedded_vector = embeddings(input_tensor_2)
 
 matrix = positional_encoding(3,4, embedded_vector=embedded_vector)
 
+seq_len =4
+causal_mask = torch.triu(torch.ones(seq_len, seq_len), diagonal=1).bool()
+# Simulated raw attention scores (e.g., query @ key.T)
+attention_scores = torch.randn(4, 4)
 
-a = b = 2 
-print(a)
-print(b)
+# Replace 'True' positions in the mask with negative infinity
+masked_scores = attention_scores.masked_fill(causal_mask, float('-inf'))
+print(masked_scores)
+# Output will have -inf values in the upper right triangle, 
+# ensuring the model ignores those future values.
 
 
 

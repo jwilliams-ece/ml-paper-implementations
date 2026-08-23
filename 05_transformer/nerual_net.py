@@ -22,6 +22,11 @@ class Transformer(nn.Module):
         self.K_layer = nn.Linear(in_features=d_model, out_features=d_k, dtype=torch.float64) 
         self.V_layer = nn.Linear(in_features=d_model, out_features=d_v, dtype=torch.float64)
 
+        # decoder level Q, K, V layers
+        self.decoder_Q_layer = nn.Linear(in_features=d_model, out_features=d_k, dtype=torch.float64) 
+        self.decoder_K_layer = nn.Linear(in_features=d_model, out_features=d_k, dtype=torch.float64) 
+        self.decoder_V_layer = nn.Linear(in_features=d_model, out_features=d_v, dtype=torch.float64)
+
         # Normalization for encoder sublayers
         self.layer_norm_1 = nn.LayerNorm( d_k, dtype=torch.float64)
         self.layer_norm_2 = nn.LayerNorm( d_k, dtype=torch.float64)
@@ -52,8 +57,23 @@ class Transformer(nn.Module):
 
 
     class Decoder():
-        def __init__(self, embedded_matrix):
-            pass
+        def __init__(self, Q, K, V, d_k):
+
+            self.Q_matrix = Q
+            self.K_matrix = K
+            self.V_matrix = V
+            self.d_k = d_k
+
+        def masked_self_attention(self):
+            mask = torch.triu(torch.ones(self.Q_matrix.shape[0],self.K_matrix.shape[0]), diagonal=1).bool()
+
+            QK_t = self.Q_matrix @ torch.transpose(self.K_matrix, dim0=0,dim1=1)
+            normalized = QK_t / torch.sqrt(torch.tensor(self.d_k))
+            masked = normalized.masked_fill(mask, float('-inf'))
+            softmask = torch.softmax(masked, dim=1)
+            masked_attention = softmask @ self.V_matrix
+
+            return masked_attention
 
 
 
@@ -104,6 +124,8 @@ class Transformer(nn.Module):
 
 
     def forward(self, encoder_input, decoder_input):
+
+
         # 1) Encoder pass
         # Input is a 2D tensor of tokens
         embedded_matrix = self.input_embedding(encoder_input)
@@ -120,14 +142,22 @@ class Transformer(nn.Module):
         encoder_ffn_w2 = self.encoder_ffn_w2(r1)
         layer_norm_2 = self.layer_norm_2(encoder_ffn_w2 + layer_norm_1)
 
+
         # 2) Decoder pass
         decoder_embedded_matrix = self.decoder_input_embedding(decoder_input)
         decoder_positional_matrix = self.PositionalEncoder(embedded_matrix=decoder_embedded_matrix).positional_encoding()
-        
+        decoder_q = self.decoder_Q_layer(decoder_positional_matrix)
+        decoder_k = self.decoder_K_layer(decoder_positional_matrix)
+        decoder_v = self.decoder_V_layer(decoder_positional_matrix)
+
+        # apply the masked attention; add & Normalize
+        # TODO make d_k more modular
+        masked_attention = self.Decoder(Q=decoder_q,K=decoder_k,V=decoder_v,d_k=20).masked_self_attention()
 
 
 
-        return layer_norm_2
+
+        return masked_attention
         
 
 
@@ -138,8 +168,8 @@ text_len = len(test_tokens)
 decoder_input_tokens = torch.tensor([3,4,5])
 
 model = Transformer(vocab_size=200,d_model=20,heads=1,text_len=text_len)
-encoder_output = model(test_tokens, decoder_input_tokens)
+masked_attention = model(test_tokens, decoder_input_tokens)
 
-print(encoder_output)
+print(masked_attention)
 
     
