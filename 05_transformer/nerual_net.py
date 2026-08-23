@@ -12,8 +12,8 @@ class Transformer(nn.Module):
         super().__init__()
 
         # Convert input sequence into emmbedded sequence 
-        # Add positional encoding to retain sequence order
         self.input_embedding = nn.Embedding(vocab_size, d_model)
+        self.decoder_input_embedding = nn.Embedding(vocab_size,d_model)
 
         # Linear transformation to compute Q, K, and V
         # in_features = d_model, out_features = d_k/d_v
@@ -52,7 +52,8 @@ class Transformer(nn.Module):
 
 
     class Decoder():
-        pass
+        def __init__(self, embedded_matrix):
+            pass
 
 
 
@@ -102,9 +103,10 @@ class Transformer(nn.Module):
             return positional_matrix + self.embedded_matrix   
 
 
-    def forward(self, input):
+    def forward(self, encoder_input, decoder_input):
+        # 1) Encoder pass
         # Input is a 2D tensor of tokens
-        embedded_matrix = self.input_embedding(input)
+        embedded_matrix = self.input_embedding(encoder_input)
         positional_matrix = self.PositionalEncoder(embedded_matrix=embedded_matrix).positional_encoding()
         Q_layer = self.Q_layer(positional_matrix)
         K_layer = self.K_layer(positional_matrix)
@@ -118,6 +120,13 @@ class Transformer(nn.Module):
         encoder_ffn_w2 = self.encoder_ffn_w2(r1)
         layer_norm_2 = self.layer_norm_2(encoder_ffn_w2 + layer_norm_1)
 
+        # 2) Decoder pass
+        decoder_embedded_matrix = self.decoder_input_embedding(decoder_input)
+        decoder_positional_matrix = self.PositionalEncoder(embedded_matrix=decoder_embedded_matrix).positional_encoding()
+        
+
+
+
         return layer_norm_2
         
 
@@ -126,8 +135,10 @@ class Transformer(nn.Module):
 test_tokens = torch.tensor([0,1,2])
 text_len = len(test_tokens)
 
+decoder_input_tokens = torch.tensor([3,4,5])
+
 model = Transformer(vocab_size=200,d_model=20,heads=1,text_len=text_len)
-encoder_output = model(test_tokens)
+encoder_output = model(test_tokens, decoder_input_tokens)
 
 print(encoder_output)
 
