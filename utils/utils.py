@@ -48,7 +48,7 @@ def get_mean_and_std():
     ])
 
     dataset = ImageFolder(
-        r"C:\Users\marve\Desktop\papers\02_alexnet\data\imagenet_100",
+        r"02_alexnet\data\imagenet_100\train", # keep as trainset to prevent data leakage
         transform=transform
     )
 
