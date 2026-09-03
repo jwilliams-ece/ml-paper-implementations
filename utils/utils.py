@@ -142,4 +142,4 @@ def move_train_images_to_test() -> None:
 
 
 if __name__ == "__main__":
-    move_train_images_to_test()
+    get_mean_and_std()

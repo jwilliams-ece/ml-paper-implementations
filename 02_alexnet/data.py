@@ -5,8 +5,8 @@ from torchvision.transforms import v2
 from pathlib import Path
 
 # ImageNet 100 channel statistics
-mean = [0.4595, 0.4559, 0.3857]
-std = [0.2517, 0.2373, 0.2526]
+mean = [0.4598, 0.4561, 0.3858]
+std = [0.2515, 0.2370, 0.2524]
 
 def get_dataloader(
         batch_size: int,
